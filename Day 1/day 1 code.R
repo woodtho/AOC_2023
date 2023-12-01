@@ -81,9 +81,7 @@ read.table("Day 1/Input.txt") %>%
     # involves reversing the string, extracting, and then reversing back
     .last = str_extract(stri_reverse(V1),
                         paste0(stri_reverse(digit_pattern), "|\\d")) %>%
-      stri_reverse(.)
-  ) %>%
-  mutate(
+      stri_reverse(.),
     # Map the extracted word-digits to their numerical counterparts using
     # 'full_number_map'
     across(.first:.last, ~ full_number_map[.x]),
