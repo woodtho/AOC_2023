@@ -19,13 +19,22 @@ library(stringi)
 # Consider your entire calibration document. What is the sum of all of the
 # calibration values?
   
+# Read data from the file "Day 1/Input.txt"
 read.table("Day 1/Input.txt") %>% 
-  mutate(numbers = str_extract_all(V1, "\\d"),
-         .first = map_chr(numbers, first),
-         .last = map_chr(numbers, last),
-         .sum = as.numeric(paste0(.first, .last))) %>% 
-summarise(total = sum(.sum))
-
+  mutate(
+    # Extract all digit sequences from each line in the V1 column
+    numbers = str_extract_all(V1, "\\d"),
+    # Extract the first digit from each set of numbers
+    .first = map_chr(numbers, first),
+    # Extract the last digit from each set of numbers
+    .last = map_chr(numbers, last),
+    # Combine the first and last digits and convert them into a numeric value
+    .total = as.numeric(paste0(.first, .last))
+  ) %>% 
+  # Summarise the data by calculating the sum of the '.total' column
+  summarise(.total = sum(.total))
+#>   .total
+#> 1  54644
 
 # Part 2 ------------------------------------------------------------------
 
@@ -49,23 +58,39 @@ summarise(total = sum(.sum))
 # 
 # What is the sum of all of the calibration values?
 
+# Create a named vector 'digit_map' where numbers 1 to 9 are mapped to their
+# word representations
 digit_map <- set_names(
-    1:9,
-    c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
-    )
+  1:9,
+  c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+)
 
+# Extend 'digit_map' to include a mapping of numbers 1 to 9 to themselves
 full_number_map <- c(digit_map, set_names(1:9, 1:9))
 
+# Create a regex pattern 'digit_pattern' to match any of the words in
+# 'digit_map'
 digit_pattern <- paste(names(digit_map), collapse = "|")
 
+# Read data from "Day 1/Input.txt" and
 read.table("Day 1/Input.txt") %>%
   mutate(
+    # Extract the first digit or word-digit from each line in V1 column
     .first = str_extract(V1, paste0("\\d|", digit_pattern)),
+    # Extract the last digit or word-digit from each line in V1 column. This
+    # involves reversing the string, extracting, and then reversing back
     .last = str_extract(stri_reverse(V1),
                         paste0(stri_reverse(digit_pattern), "|\\d")) %>%
       stri_reverse(.)
   ) %>%
-  mutate(across(.first:.last, ~ full_number_map[.x]),
-         .sum = as.numeric(paste0(.first, .last))) %>%
-  summarise(total = sum(.sum))
-  
+  mutate(
+    # Map the extracted word-digits to their numerical counterparts using
+    # 'full_number_map'
+    across(.first:.last, ~ full_number_map[.x]),
+    # Concatenate the first and last numbers and convert them to numeric
+    .total = as.numeric(paste0(.first, .last))
+  ) %>%
+  # Summarize the data by calculating the sum of the '.total' column
+  summarise(.total = sum(.total))
+#>   .total
+#> 1  53348
