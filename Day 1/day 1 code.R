@@ -1,4 +1,5 @@
 library(tidyverse)
+library(stringi)
 
 # Part 1 ------------------------------------------------------------------ 
 
@@ -19,7 +20,6 @@ library(tidyverse)
 # calibration values?
   
 read.table("Day 1/Input.txt") %>% 
-  as_tibble() %>% 
   mutate(numbers = str_extract_all(V1, "\\d"),
          .first = map_chr(numbers, first),
          .last = map_chr(numbers, last),
@@ -49,40 +49,23 @@ summarise(total = sum(.sum))
 # 
 # What is the sum of all of the calibration values?
 
-number_map <- set_names(
-  1:9,
-  c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine"))
+digit_map <- set_names(
+    1:9,
+    c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+    )
 
-read.table("Day 1/Input.txt") %>% 
-  as_tibble() %>% 
-    mutate(
-      .first = str_extract(V1, paste0("\\d|", paste(
-        names(number_map), collapse = "|"
-      ))),
-      .last = str_extract(
-        map_chr( V1,
-          ~ str_split_1(.x, pattern = "") %>% rev() %>% paste0(., collapse = "")
-        ),
-        paste0(paste0(rev(
-          str_split_1(paste(names(number_map), collapse = "|"), pattern = "")
-        ) , collapse = ""), "|\\d")
-      ) %>% map_chr(., ~paste0(rev(str_split_1(.x, "")), collapse = ""))
-      
-    ) %>% 
-    mutate(across(.first:.last, ~map_int(.x, ~c(number_map, set_names(1:9, 1:9))[[.x]])),
-           .sum = as.numeric(paste0(.first, .last))) %>% 
+full_number_map <- c(digit_map, set_names(1:9, 1:9))
+
+digit_pattern <- paste(names(digit_map), collapse = "|")
+
+read.table("Day 1/Input.txt") %>%
+  mutate(
+    .first = str_extract(V1, paste0("\\d|", digit_pattern)),
+    .last = str_extract(stri_reverse(V1),
+                        paste0(stri_reverse(digit_pattern), "|\\d")) %>%
+      stri_reverse(.)
+  ) %>%
+  mutate(across(.first:.last, ~ full_number_map[.x]),
+         .sum = as.numeric(paste0(.first, .last))) %>%
   summarise(total = sum(.sum))
-  
-  
-  
-    
-    
-    
-  
-  
-  
-  
-  
-  
-
   
