@@ -37,7 +37,7 @@ game_data <- read.table("Day 2/Input.txt", sep = "~") %>%
   mutate(across(where(is.character), ~replace_na(parse_number(.x), 0))) 
 
 # Evaluate game data against the defined color constraints and sum valid player IDs
-valid_game_summary <- game_data %>% 
+game_data %>% 
   # Validate each colour against maximum allowed value
   mutate(valid_red = all(red <= max_allowed_colors$red),       
          valid_green = all(green <= max_allowed_colors$green),
@@ -47,7 +47,11 @@ valid_game_summary <- game_data %>%
   # Keep only rows where all color validations are true
   filter(all_colors_valid) %>%   
   # Sum the player IDs of valid entries
-  summarise(total_valid_game_ids = sum(game_id))          
+  summarise(total_valid_game_ids = sum(game_id))        
+#> # A tibble: 1 × 1
+#>     total_valid_game_ids
+#>                    <dbl>
+#>   1                 2563
 
 
 # Part 2 ------------------------------------------------------------------
@@ -57,14 +61,18 @@ valid_game_summary <- game_data %>%
 # must have been present. What is the sum of the power of these sets?
 
 # Calculate the maximum combined power based on the color scores
-max_combined_power <- game_data %>%
+game_data %>%
   # Determine the maximum possible for each colour
   summarise(
-    max_red = max(red),
-    max_green = max(green),
-    max_blue = max(blue),  
+    r = max(red),
+    g = max(green),
+    b = max(blue),  
     # Calculate the 'power' as the product of r, g, and b
     power = r * g * b) %>%                         
   # Sum the power for all rows
   summarise(power = sum(power))  
+#> # A tibble: 1 × 1
+#>     power
+#>     <dbl>
+#>   1 70768
             
